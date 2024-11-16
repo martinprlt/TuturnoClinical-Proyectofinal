@@ -1,12 +1,13 @@
-import mysql from 'mysql2/promise';
+import mysql from 'mysql2';
 
-const connection = await mysql.createConnection({
+const pool = mysql.createPool({
   host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'turnosdb'
+  user: 'tu_usuario',
+  password: 'tu_contraseña',
+  database: 'nombre_base_de_datos',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-console.log('Conectado a la base de datos MySQL');
-
-export default connection;
+export default pool; // Exportamos el pool como export default
