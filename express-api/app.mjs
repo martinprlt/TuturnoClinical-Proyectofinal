@@ -7,11 +7,11 @@ import { getEspecialidades } from './controllers/turnoscontroller.js';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 
-const app = express();
+dotenv.config();
 
+const app = express();
 app.use(cors());
 app.use(express.json());
-dotenv.config();
 
 app.use('/api/auth', authRoutes);
 app.use('/api/turnos', turnosRoutes);

@@ -1,4 +1,5 @@
 import express from 'express';
+import verifyToken from '../middlewares/auth.js';
 import { 
     getEspecialidades, 
     getHorariosDisponibles, 
@@ -12,8 +13,8 @@ const router = express.Router();
 
 router.get('/especialidades', getEspecialidades);
 router.get('/horarios', getHorariosDisponibles);
-router.post('/turnos', crearTurno);
-router.get('/turnos/:id', getTurnoById);
+router.post('/turnos', verifyToken,crearTurno);
+router.get('/turnos/:id',verifyToken,getTurnoById);
 router.put('/turnos/:id', actualizarTurno);
 router.delete('/turnos/:id', eliminarTurno);
 
