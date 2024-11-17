@@ -30,15 +30,18 @@ const TurnoForm = () => {
       .finally(() => setLoadingEspecialidades(false));
   }, []);
 
-  // Cargar horarios cuando se seleccione especialidad y fecha
+  // Cargar horarios disponibles según especialidad y fecha
   useEffect(() => {
     if (especialidadId && fecha) {
       setLoadingHorarios(true);
-      const dia = new Date(fecha).toLocaleDateString("es-ES", { weekday: "long" });
-
+      const dia = new Date(fecha).toLocaleDateString("es-ES", { weekday: "long" }).toLowerCase();
+      console.log("Día:", dia); // Verifica el valor del día
+  
       axios
         .get(`http://localhost:5000/api/horarios?especialidadId=${especialidadId}&dia=${dia}`)
         .then((response) => {
+          console.log("Horarios recibidos:", response.data); // Verifica los datos
+  
           if (response.data.length > 0) {
             setHorarios(response.data);
             setError("");
@@ -52,25 +55,25 @@ const TurnoForm = () => {
         })
         .finally(() => setLoadingHorarios(false));
     } else {
-      setHorarios([]);
+      setHorarios([]); // Limpiar horarios si no hay especialidad o fecha seleccionada.
       setError("");
     }
   }, [especialidadId, fecha]);
-
+  
   // Enviar el formulario
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     if (new Date(fecha) < new Date()) {
       alert("La fecha seleccionada no puede estar en el pasado.");
       return;
     }
-
+  
     if (!nombre || !apellido || !dni || !telefono || !email || !especialidadId || !horarioId || !fecha) {
       alert("Por favor, complete todos los campos.");
       return;
     }
-
+  
     const turno = {
       nombre,
       apellido,
@@ -81,30 +84,35 @@ const TurnoForm = () => {
       horarioId,
       fecha,
     };
-
+  
     try {
-      await axios.post("http://localhost:5000/api/turnos", turno);
-      alert("Turno creado exitosamente!");
-      // Limpiar el formulario
-      setNombre("");
-      setApellido("");
-      setDni("");
-      setTelefono("");
-      setEmail("");
-      setEspecialidadId("");
-      setHorarioId("");
-      setFecha("");
-    } catch {
+      const response = await axios.post("http://localhost:5000/api/turnos", turno);
+  
+      alert(response.data.message || "Hubo un error al crear el turno.");
+  
+      if (response.data.message === "Turno asignado exitosamente.") {
+        setNombre("");
+        setApellido("");
+        setDni("");
+        setTelefono("");
+        setEmail("");
+        setEspecialidadId("");
+        setHorarioId("");
+        setFecha("");
+      }
+  
+    } catch (error) {
       alert("Hubo un error al crear el turno.");
     }
   };
-
+  
   return (
     <div className="container">
       <h2>Solicitar Turno</h2>
       <form onSubmit={handleSubmit}>
         {error && <div className="alert alert-danger">{error}</div>}
 
+        {/* Campos del formulario */}
         <div className="form-group">
           <label>Nombre:</label>
           <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
@@ -125,6 +133,8 @@ const TurnoForm = () => {
           <label>Email:</label>
           <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
+
+        {/* Selección de especialidad */}
         <div className="form-group">
           <label>Especialidad:</label>
           <select
@@ -145,6 +155,8 @@ const TurnoForm = () => {
             ))}
           </select>
         </div>
+
+        {/* Selección de horario */}
         <div className="form-group">
           <label>Horario:</label>
           <select
@@ -159,17 +171,29 @@ const TurnoForm = () => {
               <option value="">Seleccione horario</option>
             )}
             {horarios.map((horario) => (
-              <option key={horario.id} value={horario.id}>
+              <option key={horario.hora} value={horario.hora}>
                 {horario.hora}
               </option>
             ))}
           </select>
         </div>
+
+        {/* Fecha */}
         <div className="form-group">
           <label>Fecha:</label>
-          <input type="date" className="form-control" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
+          <input
+            type="date"
+            className="form-control"
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+            required
+          />
         </div>
-        <button type="submit" className="btn btn-primary">Solicitar Turno</button>
+
+        {/* Botón de enviar */}
+        <button type="submit" className="btn btn-primary">
+          Solicitar Turno
+        </button>
       </form>
     </div>
   );

@@ -7,4 +7,7 @@ const pool = mysql.createPool({
   database: 'turnosdb'
 });
 
+
+
+
 export default pool;

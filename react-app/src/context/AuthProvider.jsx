@@ -7,11 +7,17 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const isTokenExpired = (token) => {
-    const payload = JSON.parse(atob(token.split(".")[1])); // Decodifica el payload del JWT
-    const expiry = payload.exp; // Campo de expiración en el token
-    const now = Math.floor(Date.now() / 1000); // Tiempo actual en segundos
-    return expiry < now; // Retorna true si el token ha expirado
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1])); // Decodifica el payload del JWT
+      const expiry = payload.exp; // Campo de expiración en el token
+      const now = Math.floor(Date.now() / 1000); // Tiempo actual en segundos
+      return expiry < now; // Retorna true si el token ha expirado
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return true; // Si el token no es válido, lo consideramos expirado
+    }
   };
+  
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
