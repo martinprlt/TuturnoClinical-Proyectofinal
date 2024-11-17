@@ -1,100 +1,66 @@
-import { useState} from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+import axios from 'axios';
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate(); // Para redireccionar
+  const navigate = useNavigate(); // Usa useNavigate
+  const [usuario, setUsuario] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-
+  
+    console.log('Enviando datos al backend:', { usuario, password });
+  
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.token) {
-        localStorage.setItem("token", data.token); // Guardar token en localStorage
-        navigate("/dashboard"); // Redirigir a dashboard
+      const response = await axios.post('http://localhost:5000/api/auth/login', { usuario, password });
+  
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        navigate('/');
       } else {
-        setError(data.message);
+        setError('Usuario o contraseña incorrectos');
       }
-    } catch (error) {
-      console.error(error);
-      setError("Error de servidor. Intenta más tarde.");
+    } catch (err) {
+      console.error('Error en la solicitud de login:', err);
+      setError('Usuario o contraseña incorrectos');
     }
   };
-
+  
+  
   return (
-    <section className="py-3 py-md-5">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-            <div className="card border border-light-subtle rounded-3 shadow-sm">
-              <div className="card-body p-3 p-md-4 p-xl-5">
-                <h2 className="fs-6 fw-normal text-center text-secondary mb-4">
-                  Acceso Sistema de Ventas
-                </h2>
-                <form onSubmit={handleSubmit}>
-                  <div className="row gy-2 overflow-hidden">
-                    <div className="col-12">
-                      <div className="form-floating mb-3">
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="username"
-                          id="username"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          placeholder="Nombre de usuario"
-                          required
-                        />
-                        <label className="form-label">Nombre de usuario</label>
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="form-floating mb-3">
-                        <input
-                          type="password"
-                          className="form-control"
-                          name="password"
-                          id="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Contraseña"
-                          required
-                        />
-                        <label className="form-label">Contraseña</label>
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="d-grid my-3">
-                        <button
-                          className="btn btn-primary btn-lg"
-                          type="submit"
-                        >
-                          Ingresar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-                {error && <div className="alert alert-danger">{error}</div>}
-              </div>
-            </div>
+    <div className="login-container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+      <div className="card p-4" style={{ width: '400px' }}>
+        <h2 className="text-center">Iniciar sesión</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="usuario" className="form-label">Usuario</label>
+            <input
+              type="text"
+              id="usuario"
+              className="form-control"
+              value={usuario}
+              onChange={(e) => setUsuario(e.target.value)}
+              required
+            />
           </div>
-        </div>
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              className="form-control"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          {error && <p className="text-danger">{error}</p>}
+          <button type="submit" className="btn btn-primary w-100">Iniciar sesión</button>
+        </form>
       </div>
-    </section>
+    </div>
   );
 };
 

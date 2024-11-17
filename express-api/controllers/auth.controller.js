@@ -1,55 +1,39 @@
-import pool from "../../express-api/config/db.js";
+// controllers/auth.controller.js
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import pool from '../config/db.js'; // Asegúrate de que el pool esté bien configurado
 
-const findByUsername = async (username) => {
-  const [row] = await pool.query("SELECT * FROM administradores WHERE username = ?", [
-    username,
-  ]);
-  return row[0];
-};
+// Función de login
+const login = async (req, res) => {
+  const { usuario, password } = req.body;
 
-export const register = async (req, res) => {
-  const { username, password } = req.body;
+  console.log('Datos recibidos en el backend:', { usuario, password });
 
   try {
-    const user = await findByUsername(username);
-    if (user) {
-      return res.json({ message: "Usuario ya existe" });
+    // Verifica si el usuario existe en la base de datos
+    const [rows] = await pool.query('SELECT * FROM administradores WHERE usuario = ?', [usuario]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ msg: 'Usuario no encontrado' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const admin = rows[0]; // Obtener el primer registro que coincide
 
-    const [result] = await pool.query(
-      "INSERT INTO administradores (username, password) VALUES (?, ?)",
-      [username, hashedPassword]
-    );
-    res.json({ message: "Usuario registrado exitosamente" });
+    // Compara la contraseña ingresada con la almacenada en la base de datos
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Contraseña incorrecta' });
+    }
+
+    // Si las contraseñas coinciden, genera un token JWT
+    const token = jwt.sign({ id: admin.id, usuario: admin.usuario }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    return res.json({ token });
+
   } catch (error) {
-    res.json(error.message);
+    console.error(error);
+    return res.status(500).json({ msg: 'Error del servidor' });
   }
 };
 
-export const login = async (req, res) => {
-  const { username, password } = req.body;
-
-  try {
-    const user = await findByUsername(username);
-    if (!user) {
-      return res.json({ message: "Usuario y/o contraseña son incorrectos" });
-    }
-
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return res.json({ message: "Usuario y/o contraseña son incorrectos" });
-    }
-
-    const token = jwt.sign(
-      { uid: user.uid, username: user.username },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.json({ token: token });
-  } catch (error) {
-    console.log(error.message);
-  }
-};
+export default login;

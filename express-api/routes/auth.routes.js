@@ -1,10 +1,8 @@
-import express from 'express';
+import { Router } from 'express';
+import login from '../controllers/auth.controller.js';
 
-const router = express.Router();
+const router = Router();
 
-// Ejemplo de ruta
-router.post('/', (req, res) => {
-  res.send('Login route funcionando');
-});
+router.post('/login', login);
 
 export default router;

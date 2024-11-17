@@ -1,25 +1,31 @@
+
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import 'bootstrap/dist/css/bootstrap.min.css'; 
+import { Routes, Route } from "react-router-dom";
 import Header from "./componentes/Header";
-import Home from "./componentes/Home";
-import TurnoForm from "./componentes/TurnoForm";
-import TurnosList from "./componentes/TurnosList";
-import Footer from "./componentes/Footer"; // Si decides agregar un footer
+import Home from "./componentes/Home"; 
+import Footer from "./componentes/Footer";
+import Login from "./componentes/login"; 
+import TurnoForm from "./componentes/TurnoForm"
+import TurnosList from "./componentes/TurnosList"
 
-import "./styles.css"; // Asegúrate de importar los estilos
 
-function App() {
+const App = () => {
   return (
-    <Router>
-      <Header /> {/* Barra de navegación */}
+    <div>
+      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/solicitar-turno" element={<TurnoForm />} /> {/* Ruta para el formulario de turnos */}
-        <Route path="/turnos" element={<TurnosList />} /> {/* Ruta para la lista de turnos */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/TurnoForm" element={<TurnoForm />} />
+        <Route path="/TurnosList" element={<TurnosList />} />
+
+
+        {/* Define otras rutas aquí */}
       </Routes>
-      <Footer /> {/* Pie de página */}
-    </Router>
+      <Footer />
+    </div>
   );
-}
+};
 
 export default App;
